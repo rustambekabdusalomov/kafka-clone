@@ -56,7 +56,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 			fmt.Println("Faild to read header:", err)
 			return
 		}
-		msgLen := binary.BigEndian.Uint16(header)
+		msgLen := binary.BigEndian.Uint32(header)
 
 		msg := make([]byte, msgLen)
 		if _, err := io.ReadFull(conn, msg); err != nil {
@@ -75,6 +75,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 
 		if _, ok := s.Handlers[req.Header.ReqType]; !ok {
 			fmt.Println("ReqType not found:", err)
+			continue
 		}
 
 		res, err := s.Handlers[req.Header.ReqType](ctx, req)
