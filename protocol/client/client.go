@@ -26,6 +26,7 @@ func NewClient(addr string, timeout time.Duration) *Client {
 		Timeout:    timeout,
 		ReqQueue:   sync.Map{},
 		ReqChannel: make(chan *Request, 100),
+		ClientID:   1,
 	}
 }
 

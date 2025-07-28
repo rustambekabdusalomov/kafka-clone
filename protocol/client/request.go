@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"io"
 	"time"
@@ -65,7 +66,7 @@ func (r *Request) Encode() ([]byte, error) {
 
 	// Write Header fields
 	if err := binary.Write(buf, binary.BigEndian, r.Header.ReqType); err != nil {
-		return nil, fmt.Errorf("write Version: %w", err)
+		return nil, fmt.Errorf("write ReqType: %w", err)
 	}
 
 	// Write ClientID fields
@@ -77,6 +78,7 @@ func (r *Request) Encode() ([]byte, error) {
 	if err := binary.Write(buf, binary.BigEndian, r.Header.RequestIDLength); err != nil {
 		return nil, fmt.Errorf("write RequestID length: %w", err)
 	}
+
 	if _, err := buf.Write([]byte(r.Header.RequestID)); err != nil {
 		return nil, fmt.Errorf("write requestID: %w", err)
 	}
@@ -177,6 +179,7 @@ func DecodeRequest(data []byte) (*Request, error) {
 			MessageType:     messageType,
 			Length:          length,
 			ClientID:        clietnID,
+			ReqType:         types.ReqType(reqType),
 		},
 		Body: &RequestBody{},
 	}
@@ -193,4 +196,8 @@ func DecodeRequest(data []byte) (*Request, error) {
 	}
 
 	return req, nil
+}
+
+func (r *Request) ParseBody(target any) error {
+	return json.Unmarshal(r.Body.Data, target)
 }
