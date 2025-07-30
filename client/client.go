@@ -19,7 +19,7 @@ func main() {
 
 	for i := range 100000 {
 		go func(idx int) {
-			res, _ := cln.SendRequest(1, client.NewRequest(1, []byte(fmt.Sprintf(`{"name": "User%d"}`, idx))))
+			res, _ := cln.SendRequest(1, client.NewRequest([]byte(fmt.Sprintf(`{"name": "User%d"}`, idx))))
 			log.Println("res:", idx, res.Body)
 		}(i)
 	}

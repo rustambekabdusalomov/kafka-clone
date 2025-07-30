@@ -12,19 +12,18 @@ type Response struct {
 	Body   *ResponseBody
 }
 
-func NewResponse(requestID string, messageType uint16, statusCode uint16, data []byte) *Response {
+func NewResponse(requestID string, statusCode uint16, data []byte) *Response {
 	if data == nil {
 		data = []byte{}
 	}
 
 	return &Response{
 		Header: &ResponseHeader{
-			Version:     1,
-			RequestID:   requestID,
-			MessageType: messageType,
-			Length:      uint32(len(data)),
-			CreatedAt:   time.Now().Unix(),
-			StatusCode:  statusCode,
+			Version:    1,
+			RequestID:  requestID,
+			Length:     uint32(len(data)),
+			CreatedAt:  time.Now().Unix(),
+			StatusCode: statusCode,
 		},
 		Body: &ResponseBody{
 			Data: data,
@@ -33,13 +32,12 @@ func NewResponse(requestID string, messageType uint16, statusCode uint16, data [
 }
 
 type ResponseHeader struct {
-	Version     uint8
-	RequestID   string
-	CreatedAt   int64
-	StatusCode  uint16
-	MessageType uint16
-	Length      uint32
-	ClientID    uint16
+	Version    uint8
+	RequestID  string
+	CreatedAt  int64
+	StatusCode uint16
+	Length     uint32
+	ClientID   uint16
 }
 
 type ResponseBody struct {
@@ -76,11 +74,6 @@ func (res *Response) Encode() ([]byte, error) {
 
 	// Write StatusCode
 	if err := binary.Write(&buf, binary.BigEndian, res.Header.StatusCode); err != nil {
-		return nil, err
-	}
-
-	// Write MessageType
-	if err := binary.Write(&buf, binary.BigEndian, res.Header.MessageType); err != nil {
 		return nil, err
 	}
 
@@ -148,12 +141,6 @@ func DecodeResponse(data []byte) (*Response, error) {
 		return nil, err
 	}
 
-	// Read MessageType
-	var messageType uint16
-	if err := binary.Read(buf, binary.BigEndian, &messageType); err != nil {
-		return nil, err
-	}
-
 	// Read Length
 	var length uint32
 	if err := binary.Read(buf, binary.BigEndian, &length); err != nil {
@@ -162,12 +149,11 @@ func DecodeResponse(data []byte) (*Response, error) {
 
 	res := &Response{
 		Header: &ResponseHeader{
-			Version:     version,
-			RequestID:   requestID,
-			CreatedAt:   createdAt,
-			StatusCode:  statusCode,
-			MessageType: messageType,
-			Length:      length,
+			Version:    version,
+			RequestID:  requestID,
+			CreatedAt:  createdAt,
+			StatusCode: statusCode,
+			Length:     length,
 		},
 		Body: &ResponseBody{},
 	}

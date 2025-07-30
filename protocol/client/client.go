@@ -43,7 +43,7 @@ func (c *Client) Listen() error {
 			header := make([]byte, 4)
 			_, err := io.ReadFull(conn, header)
 			if err != nil {
-				fmt.Println("Faild to read header:", err)
+				fmt.Println("Failed to read header:", err)
 				return
 			}
 			msgLen := binary.BigEndian.Uint32(header)

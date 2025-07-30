@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"time"
 
@@ -52,8 +53,13 @@ func (s *Server) handleConnection(conn net.Conn) {
 	for {
 		header := make([]byte, 4)
 		_, err := io.ReadFull(conn, header)
+		if err == io.EOF {
+			fmt.Println("connection closed")
+			return
+		}
 		if err != nil {
-			fmt.Println("Faild to read header:", err)
+			fmt.Println("Failed to read header:", err)
+			log.Println("Requests", s.Requests)
 			return
 		}
 		msgLen := binary.BigEndian.Uint32(header)
