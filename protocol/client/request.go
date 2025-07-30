@@ -18,18 +18,17 @@ type Request struct {
 	Body   *RequestBody
 }
 
-func NewRequest(messageType uint16, data []byte) *Request {
+func NewRequest(data []byte) *Request {
 	if data == nil {
 		data = []byte{}
 	}
 
 	req := &Request{
 		Header: &RequestHeader{
-			Version:     1,
-			RequestID:   uuid.NewString(),
-			CreatedAt:   time.Now().Unix(),
-			MessageType: messageType,
-			Length:      uint32(len(data)),
+			Version:   1,
+			RequestID: uuid.NewString(),
+			CreatedAt: time.Now().Unix(),
+			Length:    uint32(len(data)),
 		},
 		Body: &RequestBody{
 			Data: data,
@@ -46,7 +45,6 @@ type RequestHeader struct {
 	RequestID       string
 	RequestIDLength uint8
 	CreatedAt       int64
-	MessageType     uint16
 	Length          uint32
 	ClientID        uint16
 	ReqType         types.ReqType
@@ -86,11 +84,6 @@ func (r *Request) Encode() ([]byte, error) {
 	// Write CreatedAt
 	if err := binary.Write(buf, binary.BigEndian, r.Header.CreatedAt); err != nil {
 		return nil, fmt.Errorf("writing CreatedAt: %w", err)
-	}
-
-	// Write MessageType
-	if err := binary.Write(buf, binary.BigEndian, r.Header.MessageType); err != nil {
-		return nil, fmt.Errorf("writing MessageType: %w", err)
 	}
 
 	// Write Length
@@ -158,12 +151,6 @@ func DecodeRequest(data []byte) (*Request, error) {
 		return nil, fmt.Errorf("reading CreatedAt: %w", err)
 	}
 
-	// Read MessageType
-	var messageType uint16
-	if err := binary.Read(buf, binary.BigEndian, &messageType); err != nil {
-		return nil, fmt.Errorf("reading MessageType: %w", err)
-	}
-
 	// Read Length
 	var length uint32
 	if err := binary.Read(buf, binary.BigEndian, &length); err != nil {
@@ -176,7 +163,6 @@ func DecodeRequest(data []byte) (*Request, error) {
 			RequestID:       requestID,
 			RequestIDLength: requestIDLen,
 			CreatedAt:       createdAt,
-			MessageType:     messageType,
 			Length:          length,
 			ClientID:        clietnID,
 			ReqType:         types.ReqType(reqType),

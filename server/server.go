@@ -21,7 +21,7 @@ func main() {
 
 		log.Println("BODY: ", body)
 
-		return client.NewResponse(r.Header.RequestID, r.Header.MessageType, 200, nil), nil
+		return client.NewResponse(r.Header.RequestID, 200, nil), nil
 	})
 
 	srv.Listen()
